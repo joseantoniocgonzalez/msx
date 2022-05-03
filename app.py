@@ -35,5 +35,5 @@ def juego(identificador):
             return render_template('juego.html',juego=i)
     abort(404)
 
-port=os.environ["PORT"]
-app.run('0.0.0.0', int(port), debug=False)
+
+app.run('0.0.0.0', debug=False)

@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, abort
-import json
 import os
-app = Flask(__name__)
+import json
+from flask import Flask, render_template,abort,request
+app = Flask(__name__)	
 
 with open("MSX.json") as fichero:
     datos=json.load(fichero)
@@ -12,30 +12,37 @@ def inicio():
 
 @app.route('/juegos',methods=["GET","POST"])
 def juegos():
-    categorias=[]
-    categorias.append("")
-    for i in datos:
-        if i["categoria"] not in categorias:
-            categorias.append(i["categoria"])
-    categorias.sort()
-    if request.method=="GET":
-        return render_template("juegos.html",categorias=categorias)
+    if request.method == "GET":
+        lista_categoria=[]
+        for juegos in datos:
+            lista_categoria.append(juegos["categoria"])
+        return render_template('juegos.html', lista_categoria=set(lista_categoria))
     else:
-        nombre=request.form.get("name")
-        categoria=request.form.get("category")
-        for i in datos:
-            if (nombre == "" or str(i["nombre"]).startswith(nombre)) and (categoria == "" or categoria == i["categoria"]):
-                return render_template('juegos.html',juegos=datos,nombre=nombre,categoria=categoria,categorias=categorias)
-        return render_template('juegos.html',nombre=nombre,categoria=categoria,categorias=categorias)
+        nombre_juego=request.form.get("nombre")
+        categoria=request.form.get("categorias")
+        lista_nombres=[]
+        lista_desarrolladores=[]
+        lista_ids=[]
+        lista_categoria=[]
+        for juegos in datos:
+            lista_categoria.append(juegos["categoria"])
+            if nombre_juego == "" and str(juegos["categoria"]) == categoria:
+                lista_desarrolladores.append(juegos["desarrollador"])
+                lista_nombres.append(juegos["nombre"])
+                lista_ids.append(juegos["id"])
+            elif str(juegos["nombre"]).startswith(nombre_juego) and str(juegos["categoria"]) == categoria:
+                lista_desarrolladores.append(juegos["desarrollador"])
+                lista_nombres.append(juegos["nombre"])
+                lista_ids.append(juegos["id"])
+        return render_template("juegos.html", nombre_juego=nombre_juego, lista_nombres=lista_nombres, lista_desarrolladores=lista_desarrolladores, lista_ids=lista_ids, lista_categoria=set(lista_categoria))
 
-@app.route('/juego/<int:identificador>',methods=["GET"])
-def juego(identificador):
-    for i in datos:
-        if i["id"] == identificador:
-            return render_template('juego.html',juego=i)
-    abort(404)
+@app.route('/juego/<int:identificador>')
+def juego_id(identificador):
+    for juegos in datos:
+        if juegos["id"] == identificador:
+            return render_template('idjuegos.html', juego=juegos)
+        
+    return abort(404)
 
-
-port=os.environ ["PORT"]
-
+port=os.environ["PORT"]
 app.run('0.0.0.0',int(port),debug=False)

@@ -36,4 +36,6 @@ def juego(identificador):
     abort(404)
 
 
-app.run('0.0.0.0', debug=False)
+port=os.environ ["PORT"]
+
+app.run('0.0.0.0',int(port),debug=False
